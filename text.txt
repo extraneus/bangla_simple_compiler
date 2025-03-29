@@ -1,0 +1,9 @@
+x = 10;
+y = 20;
+
+jodi (x < y) {
+    liko("x is less than y");
+}
+
+
+
