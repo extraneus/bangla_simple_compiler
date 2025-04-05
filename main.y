@@ -52,6 +52,10 @@ extern int yylex();
 %union {
     int num;
     char *str;
+    struct {
+        int values[100];
+        int count;
+    } array;
 }
 
 %token <num> NUMBER
@@ -64,8 +68,8 @@ extern int yylex();
 %left LT GT EQ NE
 %right ASSIGN
 
-
 %type <num> Expression Term Factor Condition
+%type <array> Array NumberList
 
 %%
 
@@ -96,7 +100,44 @@ AssignStmt: IDENTIFIER ASSIGN Expression SEMICOLON {
 IfStmt: IF LPAREN Condition RPAREN LBRACE StatementList RBRACE
 ;
 
-SortStmt: SORT LPAREN Array RPAREN SEMICOLON
+IncrStmt: IDENTIFIER INCR { add_symbol($1, get_symbol_value($1) + 1); free($1); }
+        | IDENTIFIER DECR { add_symbol($1, get_symbol_value($1) - 1); free($1); }
+;
+
+SortStmt: SORT LPAREN Array RPAREN SEMICOLON {
+    for (int i = 0; i < $3.count - 1; i++) {
+        for (int j = 0; j < $3.count - i - 1; j++) {
+            if ($3.values[j] > $3.values[j + 1]) {
+                int temp = $3.values[j];
+                $3.values[j] = $3.values[j + 1];
+                $3.values[j + 1] = temp;
+            }
+        }
+    }
+    printf("Sorted array: ");
+    for (int i = 0; i < $3.count; i++) {
+        printf("%d ", $3.values[i]);
+    }
+    printf("\n");
+}
+;
+
+Array: LBRACKET NumberList RBRACKET {
+    $$ = $2;
+}
+;
+
+NumberList: NUMBER {
+    $$.values[0] = $1;
+    $$.count = 1;
+}
+| NUMBER COMMA NumberList {
+    $$.values[0] = $1;
+    for (int i = 0; i < $3.count; i++) {
+        $$.values[i + 1] = $3.values[i];
+    }
+    $$.count = $3.count + 1;
+}
 ;
 
 Expression: Term
@@ -122,17 +163,6 @@ Condition: Expression LT Expression { $$ = $1 < $3 ? 1 : 0; }
          | Expression NE Expression { $$ = $1 != $3 ? 1 : 0; }
 ;
 
-IncrStmt: IDENTIFIER INCR { add_symbol($1, get_symbol_value($1) + 1); free($1); }
-        | IDENTIFIER DECR { add_symbol($1, get_symbol_value($1) - 1); free($1); }
-;
-
-Array: LBRACKET NumberList RBRACKET
-;
-
-NumberList: NUMBER
-          | NUMBER COMMA NumberList
-;
-
 %%
 
 int main(int argc, char **argv) {
@@ -142,7 +172,7 @@ int main(int argc, char **argv) {
             perror(argv[1]);
             return 1;
         }
-        yyin = file; // Set yyin to read from the file
+        yyin = file;
     } else {
         fprintf(stderr, "Error: No input file provided\n");
         return 1;

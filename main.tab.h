@@ -91,8 +91,12 @@ union YYSTYPE
 
     int num;
     char *str;
+    struct {
+        int values[100];
+        int count;
+    } array;
 
-#line 96 "main.tab.h"
+#line 100 "main.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
