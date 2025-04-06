@@ -60,25 +60,27 @@ extern int yydebug;
     PRINT = 261,                   /* PRINT  */
     IF = 262,                      /* IF  */
     SORT = 263,                    /* SORT  */
-    ASSIGN = 264,                  /* ASSIGN  */
-    PLUS = 265,                    /* PLUS  */
-    MINUS = 266,                   /* MINUS  */
-    MULTIPLY = 267,                /* MULTIPLY  */
-    DIVIDE = 268,                  /* DIVIDE  */
-    LPAREN = 269,                  /* LPAREN  */
-    RPAREN = 270,                  /* RPAREN  */
-    LBRACE = 271,                  /* LBRACE  */
-    RBRACE = 272,                  /* RBRACE  */
-    SEMICOLON = 273,               /* SEMICOLON  */
-    COMMA = 274,                   /* COMMA  */
-    LBRACKET = 275,                /* LBRACKET  */
-    RBRACKET = 276,                /* RBRACKET  */
-    LT = 277,                      /* LT  */
-    GT = 278,                      /* GT  */
-    EQ = 279,                      /* EQ  */
-    NE = 280,                      /* NE  */
-    INCR = 281,                    /* INCR  */
-    DECR = 282                     /* DECR  */
+    REVERSE_SORT = 264,            /* REVERSE_SORT  */
+    AVERAGE = 265,                 /* AVERAGE  */
+    ASSIGN = 266,                  /* ASSIGN  */
+    PLUS = 267,                    /* PLUS  */
+    MINUS = 268,                   /* MINUS  */
+    MULTIPLY = 269,                /* MULTIPLY  */
+    DIVIDE = 270,                  /* DIVIDE  */
+    LPAREN = 271,                  /* LPAREN  */
+    RPAREN = 272,                  /* RPAREN  */
+    LBRACE = 273,                  /* LBRACE  */
+    RBRACE = 274,                  /* RBRACE  */
+    SEMICOLON = 275,               /* SEMICOLON  */
+    COMMA = 276,                   /* COMMA  */
+    LBRACKET = 277,                /* LBRACKET  */
+    RBRACKET = 278,                /* RBRACKET  */
+    LT = 279,                      /* LT  */
+    GT = 280,                      /* GT  */
+    EQ = 281,                      /* EQ  */
+    NE = 282,                      /* NE  */
+    INCR = 283,                    /* INCR  */
+    DECR = 284                     /* DECR  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -87,16 +89,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 52 "main.y"
+#line 54 "main.y"
 
     int num;
     char *str;
-    struct {
-        int values[100];
-        int count;
-    } array;
 
-#line 100 "main.tab.h"
+#line 98 "main.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

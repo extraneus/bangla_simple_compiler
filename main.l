@@ -30,7 +30,10 @@ void yyerror(const char *s);
 "!="                   { return NE; }
 "++"                   { return INCR; }
 "--"                   { return DECR; }
-"sort"|"সাজাও"        { return SORT; }
+
+"sajao"|"সাজাও"        { return SORT; }
+"ultosajao"|"উল্টে_সাজাও" { return REVERSE_SORT; }
+"average"|"গড়"        { return AVERAGE; }
 
 [0-9]+                 { yylval.num = atoi(yytext); return NUMBER; }
 \"([^\"]*)\"           { 

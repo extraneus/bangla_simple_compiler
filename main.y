@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Declare yyin from Flex
 extern FILE *yyin;
 
 // Symbol table functions
@@ -15,6 +14,9 @@ typedef struct {
 #define MAX_SYMBOLS 100
 Symbol symbols[MAX_SYMBOLS];
 int symbol_count = 0;
+
+int array[100];
+int array_size = 0;
 
 void add_symbol(char *name, int value) {
     for (int i = 0; i < symbol_count; i++) {
@@ -52,16 +54,15 @@ extern int yylex();
 %union {
     int num;
     char *str;
-    struct {
-        int values[100];
-        int count;
-    } array;
 }
 
 %token <num> NUMBER
 %token <str> IDENTIFIER STRING_LITERAL
-%token PRINT IF SORT ASSIGN PLUS MINUS MULTIPLY DIVIDE LPAREN RPAREN LBRACE RBRACE SEMICOLON COMMA
-%token LBRACKET RBRACKET LT GT EQ NE INCR DECR
+%token PRINT IF SORT REVERSE_SORT AVERAGE
+%token ASSIGN PLUS MINUS MULTIPLY DIVIDE
+%token LPAREN RPAREN LBRACE RBRACE SEMICOLON COMMA
+%token LBRACKET RBRACKET LT GT EQ NE
+%token INCR DECR
 
 %left PLUS MINUS
 %left MULTIPLY DIVIDE
@@ -69,7 +70,6 @@ extern int yylex();
 %right ASSIGN
 
 %type <num> Expression Term Factor Condition
-%type <array> Array NumberList
 
 %%
 
@@ -84,6 +84,8 @@ Statement: PrintStmt
          | AssignStmt
          | IfStmt
          | SortStmt
+         | ReverseSortStmt
+         | AverageStmt
          | IncrStmt SEMICOLON
 ;
 
@@ -100,43 +102,47 @@ AssignStmt: IDENTIFIER ASSIGN Expression SEMICOLON {
 IfStmt: IF LPAREN Condition RPAREN LBRACE StatementList RBRACE
 ;
 
-IncrStmt: IDENTIFIER INCR { add_symbol($1, get_symbol_value($1) + 1); free($1); }
-        | IDENTIFIER DECR { add_symbol($1, get_symbol_value($1) - 1); free($1); }
+SortStmt: SORT LPAREN Array RPAREN SEMICOLON
 ;
 
-SortStmt: SORT LPAREN Array RPAREN SEMICOLON {
-    for (int i = 0; i < $3.count - 1; i++) {
-        for (int j = 0; j < $3.count - i - 1; j++) {
-            if ($3.values[j] > $3.values[j + 1]) {
-                int temp = $3.values[j];
-                $3.values[j] = $3.values[j + 1];
-                $3.values[j + 1] = temp;
+ReverseSortStmt: REVERSE_SORT LPAREN Array RPAREN SEMICOLON {
+    int i, j, temp;
+    int size = array_size;
+    for (i = 0; i < size - 1; i++) {
+        for (j = 0; j < size - i - 1; j++) {
+            if (array[j] < array[j+1]) {
+                temp = array[j];
+                array[j] = array[j+1];
+                array[j+1] = temp;
             }
         }
     }
-    printf("Sorted array: ");
-    for (int i = 0; i < $3.count; i++) {
-        printf("%d ", $3.values[i]);
+    printf("Reversed Sorted Array: ");
+    for (i = 0; i < size; i++) {
+        printf("%d ", array[i]);
     }
     printf("\n");
 }
 ;
 
-Array: LBRACKET NumberList RBRACKET {
-    $$ = $2;
+AverageStmt: AVERAGE LPAREN Array RPAREN SEMICOLON {
+    int sum = 0;
+    for (int i = 0; i < array_size; i++) {
+        sum += array[i];
+    }
+    float avg = (float)sum / array_size;
+    printf("Average: %.2f\n", avg);
 }
 ;
 
+Array: LBRACKET { array_size = 0; } NumberList RBRACKET
+;
+
 NumberList: NUMBER {
-    $$.values[0] = $1;
-    $$.count = 1;
+    array[array_size++] = $1;
 }
 | NUMBER COMMA NumberList {
-    $$.values[0] = $1;
-    for (int i = 0; i < $3.count; i++) {
-        $$.values[i + 1] = $3.values[i];
-    }
-    $$.count = $3.count + 1;
+    array[array_size++] = $1;
 }
 ;
 
@@ -161,6 +167,10 @@ Condition: Expression LT Expression { $$ = $1 < $3 ? 1 : 0; }
          | Expression GT Expression { $$ = $1 > $3 ? 1 : 0; }
          | Expression EQ Expression { $$ = $1 == $3 ? 1 : 0; }
          | Expression NE Expression { $$ = $1 != $3 ? 1 : 0; }
+;
+
+IncrStmt: IDENTIFIER INCR { add_symbol($1, get_symbol_value($1) + 1); free($1); }
+        | IDENTIFIER DECR { add_symbol($1, get_symbol_value($1) - 1); free($1); }
 ;
 
 %%
